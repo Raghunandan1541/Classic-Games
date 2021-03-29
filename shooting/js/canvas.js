@@ -70,12 +70,44 @@ class Enemy {
 	}
 }
 
+const friction = 0.99
+class Particles {
+	constructor(x, y, radius, color, velocity) {
+		this.x = x
+		this.y = y
+		this.radius = radius
+		this.color = color
+		this.velocity = velocity
+		this.alpha = 1
+	}
+	
+	draw = () => {
+		ctx.save()
+		ctx.globalAlpha = this.alpha
+		ctx.beginPath()
+		ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+		ctx.fillStyle = this.color
+		ctx.fill()
+		ctx.restore()
+	}
+
+	update = () => {
+		this.draw()
+		this.velocity.x *= friction
+		this.velocity.y *= friction
+		this.x = this.x + this.velocity.x
+		this.y = this.y + this.velocity.y
+		this.alpha -= 0.01
+	}
+}
+
 
 var x = canvas.width / 2
 var y = canvas.height / 2
 let player = new Player(x, y, 10, 'white')
 let projectiles = []
 let enemies = []
+let particles = []
 
 
 function spawnEnemies() {
@@ -114,6 +146,13 @@ function animate() {
 	ctx.fillRect(0, 0, canvas.width, canvas.height)
 	player.draw()
 
+	particles.forEach((particle, index) => {
+		if(particle.alpha <= 0) {
+			particles.splice(index, 1)
+		} else {
+			particle.update()
+		}
+	})
 
 	projectiles.forEach((projectile, index) => {
 		projectile.update()
@@ -133,10 +172,30 @@ function animate() {
 	enemies.forEach((enemy, index) => {
 		enemy.update()
 
+		const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y)
+
+		if(dist - enemy.radius - player.radius < 1) {
+			cancelAnimationFrame(animationId)
+			modalEl.style.display = 'flex'
+			bigScoreEl.innerHTML = score
+		}
+
 		projectiles.forEach((projectile, projectileIndex) => {
 			const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
 
 			if(dist - enemy.radius - projectile.radius < 1) {
+
+				for (let i = 0; i < enemy.radius * 2; i++) {
+					particles.push(new Particles(
+						projectile.x, 
+						projectile.y, 
+						Math.random() * 2, 
+						enemy.color, 
+						{
+							x: (Math.random() - 0.5) * (Math.random() * 5),
+							y: (Math.random() - 0.5) * (Math.random() * 5)
+						}))
+				}
 
 				if(enemy.radius - 10 > 10) {
 
