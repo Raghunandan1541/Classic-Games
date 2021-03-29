@@ -4,6 +4,10 @@ const ctx = canvas.getContext('2d')
 canvas.width = window.innerWidth 
 canvas.height = window.innerHeight 
 
+const scoreEl = document.querySelector('#scoreEl')
+const startGameBtn = document.querySelector('#startGameBtn')
+const modalEl = document.querySelector('#modalEl')
+const finalScoreEl = document.querySelector('#finalScoreEl')
 
 class Player {
 	constructor(x, y, radius, color) {
@@ -109,6 +113,16 @@ let projectiles = []
 let enemies = []
 let particles = []
 
+function init() {
+	player = new Player(x, y, 10, 'white')
+	projectiles = []
+	enemies = []
+	particles = []
+	score = 0
+	scoreEl.innerHTML = score
+	finalScoreEl.innerHTML = score
+}
+
 
 function spawnEnemies() {
 	setInterval(() => {
@@ -140,6 +154,8 @@ function spawnEnemies() {
 	}, 1000)
 }
 
+let animationId
+let score = 0
 function animate() {
 	animationId = requestAnimationFrame(animate)
 	ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'
@@ -177,7 +193,7 @@ function animate() {
 		if(dist - enemy.radius - player.radius < 1) {
 			cancelAnimationFrame(animationId)
 			modalEl.style.display = 'flex'
-			bigScoreEl.innerHTML = score
+			finalScoreEl.innerHTML = score
 		}
 
 		projectiles.forEach((projectile, projectileIndex) => {
@@ -199,6 +215,9 @@ function animate() {
 
 				if(enemy.radius - 10 > 10) {
 
+					score += 100
+					scoreEl.innerHTML = score
+
 					gsap.to(enemy, {
 						radius: enemy.radius - 10
 					})
@@ -206,6 +225,9 @@ function animate() {
 						projectiles.splice(projectileIndex, 1)
 					}, 0)
 				} else {
+
+					score += 250
+					scoreEl.innerHTML = score
 
 					setTimeout(() => {
 						enemies.splice(index, 1)
@@ -231,5 +253,9 @@ addEventListener('click', (event) => {
 	projectiles.push(new Projectile(canvas.width / 2, canvas.height / 2, 5, 'white', velocity))
 })
 
-animate()
-spawnEnemies()
+startGameBtn.addEventListener('click', () => {
+	init()
+	animate()
+	spawnEnemies()
+	modalEl.style.display = 'none'
+})
