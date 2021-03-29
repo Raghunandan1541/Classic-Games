@@ -46,13 +46,67 @@ class Projectile {
 	}
 }
 
+class Enemy {
+	constructor(x, y, radius, color, velocity) {
+		this.x = x
+		this.y = y
+		this.radius = radius
+		this.color = color
+		this.velocity = velocity
+	}
+	
+	draw = () => {
+		
+		ctx.beginPath()
+		ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+		ctx.fillStyle = this.color
+		ctx.fill()
+	}
+
+	update = () => {
+		this.draw()
+		this.x = this.x + this.velocity.x
+		this.y = this.y + this.velocity.y
+	}
+}
+
 
 var x = canvas.width / 2
 var y = canvas.height / 2
 let player = new Player(x, y, 10, 'white')
 let projectiles = []
+let enemies = []
 
 
+function spawnEnemies() {
+	setInterval(() => {
+		const radius = Math.random() * (30 - 5) + 5
+		let x
+		let y
+		let cond = Math.random() < 0.5
+
+		if(cond) {
+			x = Math.random() < 0.5 ? 0 - radius : canvas.width + radius
+			y = Math.random() * canvas.height
+		} else {
+			x = Math.random() * canvas.width
+			y = Math.random() < 0.5 ? 0 - radius : canvas.height + radius
+		}
+
+		const color = `hsl(${Math.random() * 360} , 50%, 50%)`
+		const angle = Math.atan2(
+			canvas.height / 2 - y, 
+			canvas.width / 2 - x
+			)
+			
+		const velocity = {
+			x: Math.cos(angle),
+			y: Math.sin(angle)
+		}
+
+		enemies.push(new Enemy(x, y, radius, color, velocity))
+	}, 1000)
+}
 
 function animate() {
 	animationId = requestAnimationFrame(animate)
@@ -76,6 +130,33 @@ function animate() {
 		}
 	})
 
+	enemies.forEach((enemy, index) => {
+		enemy.update()
+
+		projectiles.forEach((projectile, projectileIndex) => {
+			const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
+
+			if(dist - enemy.radius - projectile.radius < 1) {
+
+				if(enemy.radius - 10 > 10) {
+
+					gsap.to(enemy, {
+						radius: enemy.radius - 10
+					})
+					setTimeout(() => {
+						projectiles.splice(projectileIndex, 1)
+					}, 0)
+				} else {
+
+					setTimeout(() => {
+						enemies.splice(index, 1)
+						projectiles.splice(projectileIndex, 1)
+					}, 0)
+				}
+			}
+		})
+	})
+
 }
 
 addEventListener('click', (event) => {
@@ -92,3 +173,4 @@ addEventListener('click', (event) => {
 })
 
 animate()
+spawnEnemies()
