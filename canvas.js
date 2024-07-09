@@ -1,10 +1,12 @@
-// Query and cache the canvas element and its 2D rendering context
-const canvas = document.querySelector('canvas')
-const ctx = canvas.getContext('2d')
-
+import { canvas, ctx } from './canvas-setup.js'
 // Resize the canvas to fit the window dimensions
 canvas.width = window.innerWidth 
 canvas.height = window.innerHeight 
+
+import {Player} from './player.js'
+import {Projectile} from './projectile.js'
+import {Enemy} from './enemy.js'
+import {Particles} from './particle.js'
 
 // Cache important elements for later use
 // These are the elements that control the game's UI
@@ -12,165 +14,6 @@ const scoreEl = document.querySelector('#scoreEl') // The element to display the
 const startGameBtn = document.querySelector('#startGameBtn') // The button to start the game
 const modalEl = document.querySelector('#modalEl') // The modal element for the game over screen
 const finalScoreEl = document.querySelector('#finalScoreEl') // The element to display the final score
-
-/**
- * Class representing a player on the canvas.
- * @property {number} x - The x-coordinate of the player's position.
- * @property {number} y - The y-coordinate of the player's position.
- * @property {number} radius - The radius of the player.
- * @property {string} color - The color of the player.
- */
-class Player {
-	/**
-	 * @param {number} x - The x-coordinate of the player's position.
-	 * @param {number} y - The y-coordinate of the player's position.
-	 * @param {number} radius - The radius of the player.
-	 * @param {string} color - The color of the player.
-	 */
-	constructor(x, y, radius, color) {
-		this.x = x
-		this.y = y
-		this.radius = radius
-		this.color = color
-	}
-
-	/**
-	 * Draws the player on the canvas.
-	 */
-	draw = () => {
-		ctx.beginPath()
-		ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-		ctx.fillStyle = this.color
-		ctx.fill()
-	}
-}
-
-class Projectile {
-	/**
-	 * @param {number} x - The x-coordinate of the projectile's position.
-	 * @param {number} y - The y-coordinate of the projectile's position.
-	 * @param {number} radius - The radius of the projectile.
-	 * @param {string} color - The color of the projectile.
-	 * @param {Object} velocity - The velocity of the projectile.
-	 * @param {number} velocity.x - The x-component of the velocity.
-	 * @param {number} velocity.y - The y-component of the velocity.
-	 */
-	constructor(x, y, radius, color, velocity) {
-		this.x = x
-		this.y = y
-		this.radius = radius
-		this.color = color
-		this.velocity = velocity
-	}
-	
-	/**
-	 * Draws the projectile on the canvas.
-	 */
-	draw = () => {
-		
-		ctx.beginPath()
-		ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-		ctx.fillStyle = this.color
-		ctx.fill()
-	}
-
-	/**
-	 * Updates the position of the projectile and redraws it.
-	 */
-	update = () => {
-		this.draw()
-		this.x = this.x + this.velocity.x
-		this.y = this.y + this.velocity.y
-	}
-}
-
-/**
- * Represents an enemy that can be drawn on the canvas.
- * It has a position, radius, color, and velocity.
- * The enemy moves in a random direction.
- */
-class Enemy {
-	/**
-	 * @param {number} x - The x-coordinate of the enemy's position.
-	 * @param {number} y - The y-coordinate of the enemy's position.
-	 * @param {number} radius - The radius of the enemy.
-	 * @param {string} color - The color of the enemy.
-	 * @param {Object} velocity - The velocity of the enemy.
-	 * @param {number} velocity.x - The x-coordinate of the velocity.
-	 * @param {number} velocity.y - The y-coordinate of the velocity.
-	 */
-	constructor(x, y, radius, color, velocity) {
-		this.x = x
-		this.y = y
-		this.radius = radius
-		this.color = color
-		this.velocity = velocity
-	}
-	
-	/**
-	 * Draws the enemy on the canvas.
-	 */
-	draw = () => {
-		
-		ctx.beginPath()
-		ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-		ctx.fillStyle = this.color
-		ctx.fill()
-	}
-
-	/**
-	 * Updates the position of the enemy based on its velocity.
-	 */
-	update = () => {
-		this.draw()
-		this.x = this.x + this.velocity.x
-		this.y = this.y + this.velocity.y
-	}
-}
-
-const friction = 0.99
-
-/**
- * Represents a particle that can be drawn on the canvas.
- * It has a position, radius, color, velocity, and alpha.
- * The alpha is used to control the opacity of the particle.
- */
-class Particles {
-	constructor(x, y, radius, color, velocity) {
-		this.x = x
-		this.y = y
-		this.radius = radius
-		this.color = color
-		this.velocity = velocity
-		this.alpha = 1 // Initial alpha value
-	}
-	
-	/**
-	 * Draws the particle on the canvas.
-	 */
-	draw = () => {
-		ctx.save()
-		ctx.globalAlpha = this.alpha // Set the alpha of the particle
-		ctx.beginPath()
-		ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-		ctx.fillStyle = this.color
-		ctx.fill()
-		ctx.restore()
-	}
-
-	/**
-	 * Updates the particle's position and alpha based on its velocity and friction.
-	 */
-	update = () => {
-		this.draw()
-		this.velocity.x *= friction // Apply friction to the x velocity
-		this.velocity.y *= friction // Apply friction to the y velocity
-		this.x = this.x + this.velocity.x // Update the x position
-		this.y = this.y + this.velocity.y // Update the y position
-		this.alpha -= 0.01 // Decrease the alpha by 0.01
-	}
-}
-
 
 // Define the initial position of the player on the canvas
 var x = canvas.width / 2
